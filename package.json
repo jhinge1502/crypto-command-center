@@ -1,0 +1,17 @@
+{
+  "name": "assignment-4-weather-system",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace @assignment4/web",
+    "dev:worker": "npm run dev --workspace @assignment4/worker",
+    "build": "npm run build --workspace @assignment4/web && npm run build --workspace @assignment4/worker",
+    "lint": "npm run lint --workspace @assignment4/web"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
+
