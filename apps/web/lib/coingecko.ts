@@ -107,7 +107,7 @@ export async function fetchGlobalMovers(): Promise<{
       (left, right) =>
         right.priceChangePercentage24h - left.priceChangePercentage24h
     )
-    .slice(0, 8);
+    .slice(0, 6);
 
   const losers = [...rows]
     .filter((row) => row.priceChangePercentage24h < 0)
@@ -115,7 +115,7 @@ export async function fetchGlobalMovers(): Promise<{
       (left, right) =>
         left.priceChangePercentage24h - right.priceChangePercentage24h
     )
-    .slice(0, 8);
+    .slice(0, 6);
 
   return { gainers, losers };
 }

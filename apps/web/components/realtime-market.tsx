@@ -186,7 +186,7 @@ export function RealtimeMarket({
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+      <div className={featuredCard && featuredGuidance ? "grid gap-5 xl:grid-cols-[1.15fr_0.85fr]" : "space-y-5"}>
         <div className="space-y-3">
           <MarketHeatmap
             canManageWatchlist={isSignedIn}
