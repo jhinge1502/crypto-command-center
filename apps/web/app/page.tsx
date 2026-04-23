@@ -1,6 +1,5 @@
 import { AuthPanel } from "../components/auth-panel";
-import { RealtimeMarket } from "../components/realtime-market";
-import { WatchlistManager } from "../components/watchlist-manager";
+import { MarketDashboard } from "../components/market-dashboard";
 import { fetchGlobalMovers } from "../lib/coingecko";
 import { createClient } from "../lib/supabase/server";
 import type { AssetOption, MarketCard } from "../lib/types";
@@ -132,15 +131,6 @@ export default async function HomePage() {
       </section>
 
       <section className="mt-8">
-        {user ? (
-          <div className="mb-6">
-            <WatchlistManager
-              assets={normalizeAssets(assets)}
-              selectedAssetIds={(watchlistRows ?? []).map((row) => row.asset_id)}
-              userId={user.id}
-            />
-          </div>
-        ) : null}
         <div className="mb-4 flex items-end justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-cyan-100/48">
@@ -155,17 +145,13 @@ export default async function HomePage() {
             </p>
           </div>
         </div>
-        {user ? (
-          <RealtimeMarket
-            initialCards={normalizeRows(data)}
-            globalMovers={globalMovers}
-          />
-        ) : (
-          <div className="panel-shell rounded-[2rem] border-dashed p-8 text-slate-300/74">
-            Sign in to unlock watchlist actions, add assets, and stream your
-            live crypto command center.
-          </div>
-        )}
+        <MarketDashboard
+          assets={normalizeAssets(assets)}
+          globalMovers={globalMovers}
+          initialCards={normalizeRows(data)}
+          selectedAssetIds={(watchlistRows ?? []).map((row) => row.asset_id)}
+          userId={user?.id}
+        />
       </section>
     </main>
   );

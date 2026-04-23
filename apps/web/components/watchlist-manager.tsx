@@ -1,29 +1,38 @@
 ﻿"use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { createClient } from "../lib/supabase/browser";
-import type { AssetOption, SearchAssetOption } from "../lib/types";
+import type { AssetOption, MarketCard, SearchAssetOption } from "../lib/types";
 
 type Props = {
   assets: AssetOption[];
   selectedAssetIds: string[];
   userId: string;
+  onWatchlistAssetAdded?: (payload: {
+    asset: AssetOption;
+    card: MarketCard | null;
+  }) => void;
+  onWatchlistAssetRemoved?: (assetId: string) => void;
 };
 
 export function WatchlistManager({
   assets,
   selectedAssetIds,
-  userId
+  userId,
+  onWatchlistAssetAdded,
+  onWatchlistAssetRemoved
 }: Props) {
-  const router = useRouter();
   const [selectedIds, setSelectedIds] = useState(new Set(selectedAssetIds));
   const [savingId, setSavingId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchAssetOption[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchStatus, setSearchStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedIds(new Set(selectedAssetIds));
+  }, [selectedAssetIds]);
 
   useEffect(() => {
     const trimmedQuery = query.trim();
@@ -75,34 +84,72 @@ export function WatchlistManager({
     };
   }, [query]);
 
+  async function addAssetToWatchlist(asset: {
+    symbol: string;
+    name: string;
+    currencyPair: string;
+  }) {
+    const response = await fetch("/api/assets/watchlist", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(asset)
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to add asset");
+    }
+
+    return (await response.json()) as {
+      ok: true;
+      asset: AssetOption;
+      card: MarketCard | null;
+    };
+  }
+
   async function toggleWatchlist(assetId: string) {
     const supabase = createClient();
     const nextSelected = new Set(selectedIds);
     const isSelected = nextSelected.has(assetId);
+    const asset = assets.find((candidate) => candidate.id === assetId);
 
     setSavingId(assetId);
 
-    if (isSelected) {
-      nextSelected.delete(assetId);
-      setSelectedIds(nextSelected);
+    try {
+      if (isSelected) {
+        nextSelected.delete(assetId);
+        setSelectedIds(nextSelected);
 
-      await supabase
-        .from("user_watchlist_assets")
-        .delete()
-        .eq("user_id", userId)
-        .eq("asset_id", assetId);
-    } else {
-      nextSelected.add(assetId);
-      setSelectedIds(nextSelected);
+        await supabase
+          .from("user_watchlist_assets")
+          .delete()
+          .eq("user_id", userId)
+          .eq("asset_id", assetId);
 
-      await supabase.from("user_watchlist_assets").insert({
-        user_id: userId,
-        asset_id: assetId
-      });
+        onWatchlistAssetRemoved?.(assetId);
+      } else {
+        if (!asset) {
+          throw new Error("Missing asset metadata");
+        }
+
+        nextSelected.add(assetId);
+        setSelectedIds(nextSelected);
+
+        const payload = await addAssetToWatchlist({
+          symbol: asset.symbol,
+          name: asset.name,
+          currencyPair: asset.currencyPair
+        });
+
+        onWatchlistAssetAdded?.({
+          asset: payload.asset,
+          card: payload.card
+        });
+      }
+    } finally {
+      setSavingId(null);
     }
-
-    setSavingId(null);
-    router.refresh();
   }
 
   async function addSearchAsset(asset: SearchAssetOption) {
@@ -111,22 +158,20 @@ export function WatchlistManager({
     setSearchStatus("Adding asset to your watchlist...");
 
     try {
-      const response = await fetch("/api/assets/watchlist", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(asset)
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to add asset");
-      }
+      const payload = await addAssetToWatchlist(asset);
 
       setQuery("");
       setSearchResults([]);
+      setSelectedIds((current) => {
+        const next = new Set(current);
+        next.add(payload.asset.id);
+        return next;
+      });
       setSearchStatus(`${asset.symbol} was added to your watchlist.`);
-      router.refresh();
+      onWatchlistAssetAdded?.({
+        asset: payload.asset,
+        card: payload.card
+      });
     } catch (error) {
       console.error("Adding search asset failed", error);
       setSearchStatus("Could not add that asset right now.");
