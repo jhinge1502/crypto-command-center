@@ -58,7 +58,7 @@ function HeatmapTile({
 
   return (
     <article
-      className={`group rounded-[1.3rem] border p-3 transition hover:-translate-y-0.5 ${surfaceClasses}`}
+      className={`group rounded-[1.35rem] border p-3.5 transition hover:-translate-y-0.5 ${surfaceClasses}`}
     >
       <Link className="block" href={asset.detailHref as Route}>
         <div className="flex items-center gap-2">
@@ -74,14 +74,16 @@ function HeatmapTile({
             <p className={`text-[10px] uppercase tracking-[0.18em] ${toneText}`}>
               Rank {asset.marketCapRank ?? "n/a"}
             </p>
-            <h5 className="truncate font-display text-2xl leading-none text-white">
+            <h5 className="truncate font-display text-[2rem] leading-none text-white">
               {asset.symbol}
             </h5>
           </div>
         </div>
 
-        <p className="mt-2 truncate text-xs text-slate-300/74">{asset.name}</p>
-        <p className="mt-3 text-xl font-semibold text-white">
+        <p className="mt-2 line-clamp-2 min-h-[2rem] text-xs text-slate-300/74">
+          {asset.name}
+        </p>
+        <p className="mt-3 text-[1.55rem] font-semibold text-white">
           {formatPrice(asset.currentPrice)}
         </p>
         <div
@@ -194,7 +196,7 @@ export function MarketHeatmap({
               6 names
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             {gainers.map((asset) => (
               <HeatmapTile
                 asset={asset}
@@ -220,7 +222,7 @@ export function MarketHeatmap({
               6 names
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             {losers.map((asset) => (
               <HeatmapTile
                 asset={asset}

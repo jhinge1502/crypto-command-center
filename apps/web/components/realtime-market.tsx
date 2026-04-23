@@ -64,9 +64,7 @@ export function RealtimeMarket({
   useEffect(() => {
     const trackedIds = new Set(initialTrackedAssets.map((asset) => asset.id));
 
-    setCards((current) =>
-      current.filter((card) => trackedIds.has(card.assetId))
-    );
+    setCards((current) => current.filter((card) => trackedIds.has(card.assetId)));
   }, [initialTrackedAssets]);
 
   const refreshWatchlistCards = useCallback(async () => {
@@ -186,66 +184,72 @@ export function RealtimeMarket({
 
   return (
     <div className="space-y-5">
-      <div className={featuredCard && featuredGuidance ? "grid gap-5 xl:grid-cols-[1.15fr_0.85fr]" : "space-y-5"}>
-        <div className="space-y-3">
-          <MarketHeatmap
-            canManageWatchlist={isSignedIn}
-            gainers={globalMovers.gainers}
-            losers={globalMovers.losers}
-            onAddAsset={addAssetToWatchlist}
-            trackedCurrencyPairs={trackedCurrencyPairs}
-          />
-          {heatmapStatus ? (
-            <p className="px-2 text-sm text-slate-300/72">
-              {pendingPair ? `${heatmapStatus}` : heatmapStatus}
-            </p>
-          ) : null}
-        </div>
+      <div className="space-y-3">
+        <MarketHeatmap
+          canManageWatchlist={isSignedIn}
+          gainers={globalMovers.gainers}
+          losers={globalMovers.losers}
+          onAddAsset={addAssetToWatchlist}
+          trackedCurrencyPairs={trackedCurrencyPairs}
+        />
+        {heatmapStatus ? (
+          <p className="px-2 text-sm text-slate-300/72">{heatmapStatus}</p>
+        ) : null}
+      </div>
 
-        {featuredCard && featuredGuidance ? (
-          <section className="panel-shell rounded-[2.25rem] p-6 text-white">
-            <p className="text-sm uppercase tracking-[0.3em] text-cyan-100/55">
-              Spotlight asset
-            </p>
-            <p className="mt-4 text-sm uppercase tracking-[0.24em] text-cyan-100/45">
-              {featuredCard.symbol} - {featuredCard.name}
-            </p>
-            <h3 className="mt-2 font-display text-4xl leading-tight lg:text-5xl">
-              {featuredGuidance.action}
-            </h3>
-            <p className="mt-3 text-base leading-7 text-slate-300/78">
-              {featuredGuidance.summary}
-            </p>
+      {featuredCard && featuredGuidance ? (
+        <section className="panel-shell rounded-[2.25rem] p-6 text-white">
+          <div className="flex flex-wrap items-start justify-between gap-5">
+            <div className="max-w-3xl">
+              <p className="text-sm uppercase tracking-[0.3em] text-cyan-100/55">
+                Spotlight asset
+              </p>
+              <p className="mt-4 text-sm uppercase tracking-[0.24em] text-cyan-100/45">
+                {featuredCard.symbol} - {featuredCard.name}
+              </p>
+              <h3 className="mt-2 font-display text-4xl leading-tight lg:text-5xl">
+                {featuredGuidance.action}
+              </h3>
+              <p className="mt-3 text-base leading-7 text-slate-300/78">
+                {featuredGuidance.summary}
+              </p>
+            </div>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <div className="glass-card rounded-[1.5rem] p-4">
-                <p className="text-xs uppercase tracking-[0.22em] text-slate-400">
-                  Spot price
-                </p>
-                <p className="mt-2 text-4xl font-semibold">
-                  {formatPrice(featuredCard.spotPrice)}
-                </p>
-              </div>
-              <div
-                className={`rounded-[1.5rem] border p-4 ${getChangeBadgeClasses(
+            <Link
+              className="inline-flex rounded-full border border-cyan-300/15 bg-cyan-300/[0.08] px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-300/[0.14]"
+              href={`/assets/${featuredCard.slug}`}
+            >
+              Open {featuredCard.symbol} detail page
+            </Link>
+          </div>
+
+          <div className="mt-6 grid gap-3 lg:grid-cols-[0.9fr_0.9fr_1.2fr]">
+            <div className="glass-card rounded-[1.5rem] p-4">
+              <p className="text-xs uppercase tracking-[0.22em] text-slate-400">
+                Spot price
+              </p>
+              <p className="mt-2 text-4xl font-semibold">
+                {formatPrice(featuredCard.spotPrice)}
+              </p>
+            </div>
+            <div
+              className={`rounded-[1.5rem] border p-4 ${getChangeBadgeClasses(
+                featuredCard.priceChangePct
+              )}`}
+            >
+              <p className="text-xs uppercase tracking-[0.22em] text-slate-400">
+                Snapshot change
+              </p>
+              <p
+                className={`mt-2 text-5xl font-semibold ${getChangeClasses(
                   featuredCard.priceChangePct
                 )}`}
               >
-                <p className="text-xs uppercase tracking-[0.22em] text-slate-400">
-                  Snapshot change
-                </p>
-                <p
-                  className={`mt-2 text-5xl font-semibold ${getChangeClasses(
-                    featuredCard.priceChangePct
-                  )}`}
-                >
-                  {featuredCard.priceChangePct >= 0 ? "+" : ""}
-                  {featuredCard.priceChangePct.toFixed(2)}%
-                </p>
-              </div>
+                {featuredCard.priceChangePct >= 0 ? "+" : ""}
+                {featuredCard.priceChangePct.toFixed(2)}%
+              </p>
             </div>
-
-            <div className="mt-4 rounded-[1.5rem] border border-cyan-300/10 bg-cyan-300/[0.06] p-4">
+            <div className="rounded-[1.5rem] border border-cyan-300/10 bg-cyan-300/[0.06] p-4">
               <p className="text-xs uppercase tracking-[0.22em] text-cyan-100/45">
                 Trade note
               </p>
@@ -259,29 +263,23 @@ export function RealtimeMarket({
                 Observed {new Date(featuredCard.observedAt).toLocaleString()}
               </p>
             </div>
-            <Link
-              className="mt-5 inline-flex rounded-full border border-cyan-300/15 bg-cyan-300/[0.08] px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-300/[0.14]"
-              href={`/assets/${featuredCard.slug}`}
-            >
-              Open {featuredCard.symbol} detail page
-            </Link>
-          </section>
-        ) : (
-          <section className="panel-shell rounded-[2.25rem] p-6 text-white">
-            <p className="text-sm uppercase tracking-[0.3em] text-cyan-100/55">
-              Watchlist status
-            </p>
-            <h3 className="mt-4 font-display text-4xl leading-tight lg:text-5xl">
-              {isSignedIn ? "Start building your shortlist." : "Global market board is open."}
-            </h3>
-            <p className="mt-3 text-base leading-7 text-slate-300/78">
-              {isSignedIn
-                ? "Use the buttons in the heatmap or the watchlist builder above. As soon as you add a supported asset, it will start appearing in your board here."
-                : "You can browse the 24-hour movers without signing in. Sign in only when you want a personal watchlist and live tracked board."}
-            </p>
-          </section>
-        )}
-      </div>
+          </div>
+        </section>
+      ) : (
+        <section className="panel-shell rounded-[2.25rem] p-6 text-white">
+          <p className="text-sm uppercase tracking-[0.3em] text-cyan-100/55">
+            Watchlist status
+          </p>
+          <h3 className="mt-4 font-display text-4xl leading-tight lg:text-5xl">
+            {isSignedIn ? "Start building your shortlist." : "Global market board is open."}
+          </h3>
+          <p className="mt-3 text-base leading-7 text-slate-300/78">
+            {isSignedIn
+              ? "Use the buttons in the heatmap or the watchlist builder above. As soon as you add a supported asset, it will start appearing in your board here."
+              : "You can browse the 24-hour movers without signing in. Sign in only when you want a personal watchlist and live tracked board."}
+          </p>
+        </section>
+      )}
 
       {rankedCards.length ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
